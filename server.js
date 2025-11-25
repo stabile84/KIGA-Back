@@ -46,7 +46,8 @@ app.use('/api/login', loginLimiter);
 const whitelist = [
   'http://localhost:5173', // Para cuando desarrollas en casa
   'http://localhost:3000', // Por si acaso
-  'https://turnero-kiga.vercel.app' // 👈 ¡TU NUEVA URL DE VERCEL! (Sin barra al final)
+  'http://192.168.1.14:3000', // Para probar desde tu celular en local
+  'https://kiga-front.vercel.app' // 👈 ¡TU NUEVA URL DE VERCEL! (Sin barra al final)
 ];
 
 const corsOptions = {
