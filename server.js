@@ -35,6 +35,12 @@ const loginLimiter = rateLimit({
     message: { message: 'Demasiados intentos de login. Espera 1 minuto.' }
 });
 
+// RUTA PING (Para evitar que Render se duerma)
+app.get('/ping', (req, res) => {
+    console.log('Ping recibido!'); // Opcional: para verlo en los logs
+    res.send('pong');
+});
+
 // 👇 APLICAR EL LIMITADOR AL LOGIN
 app.use('/api/login', loginLimiter);
 
