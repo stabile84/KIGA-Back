@@ -39,6 +39,29 @@ const loginLimiter = rateLimit({
 app.use('/api/login', loginLimiter);
 
 // Middlewares: funciones que se ejecutan en cada petición
+
+// index.js
+
+// Lista blanca de orígenes permitidos
+const whitelist = [
+  'http://localhost:5173', // Para cuando desarrollas en casa
+  'http://localhost:3000', // Por si acaso
+  'https://turnero-kiga.vercel.app' // 👈 ¡TU NUEVA URL DE VERCEL! (Sin barra al final)
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permitir peticiones sin origen (como Postman/Mobile apps) o si está en la lista
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Bloqueado por CORS: Tu origen no está autorizado'))
+    }
+  },
+  credentials: true 
+};
+
+app.use(cors(corsOptions));
 app.use(cors()); // Permite peticiones de otros orígenes (nuestro frontend)
 app.use(express.json({ limit: '50mb' })); // Permite al servidor entender JSON y aumenta el límite para los archivos
 
