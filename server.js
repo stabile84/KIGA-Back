@@ -11,6 +11,13 @@ const jwt = require('jsonwebtoken');
 // Creamos la aplicación Express
 const app = express();
 
+// RUTA PING (Para evitar que Render se duerma)
+// Sin seguridad, sin rate-limit, sin cors estricto. Solo responder rápido.
+app.get('/ping', (req, res) => {
+    console.log('Ping recibido!'); // Opcional: para verlo en los logs
+    res.send('pong');
+});
+
 // --- SEGURIDAD 1: HELMET ---
 app.use(helmet());
 
@@ -33,12 +40,6 @@ const loginLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minuto
     max: 5, // Solo 5 intentos fallidos
     message: { message: 'Demasiados intentos de login. Espera 1 minuto.' }
-});
-
-// RUTA PING (Para evitar que Render se duerma)
-app.get('/ping', (req, res) => {
-    console.log('Ping recibido!'); // Opcional: para verlo en los logs
-    res.send('pong');
 });
 
 // 👇 APLICAR EL LIMITADOR AL LOGIN
