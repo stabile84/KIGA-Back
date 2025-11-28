@@ -9,7 +9,6 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 
-// --- CONFIGURACIÓN CORS (ANTES DE TODO) ---
 const whitelist = [
   'http://localhost:5173',
   'http://localhost:3000',
@@ -43,7 +42,7 @@ app.set('trust proxy', 1);
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100,
-  message: 'Demasiadas peticiones, intenta más tarde.',
+  message: { message: 'Demasiadas peticiones, intenta más tarde.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
