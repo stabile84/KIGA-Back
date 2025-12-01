@@ -73,7 +73,8 @@ const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 5,
   queueLimit: 0,
-  enableKeepAlive: true
+  enableKeepAlive: true,
+  dateStrings: true
 }).promise();
 
 app.post('/api/login', async (req, res) => {
