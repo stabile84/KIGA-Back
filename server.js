@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -38,6 +39,7 @@ app.get('/ping', (req, res) => {
 // --- SEGURIDAD ---
 app.use(helmet());
 app.set('trust proxy', 1);
+app.use(cookieParser());
 
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -111,11 +113,17 @@ app.post('/api/login', async (req, res) => {
         permissions: user.permissions
       },
       process.env.JWT_SECRET,
-      { expiresIn: '10h' }
+      { expiresIn: '8h' }
     );
 
+    res.cookie('token', token, {
+      httpOnly: true, // 🛡️ JavaScript no la ve (Anti-XSS)
+      secure: true,   // 🛡️ Obligatorio para HTTPS (Render/Vercel) y SameSite: None
+      sameSite: 'none', // 🛡️ Permite que viaje de Vercel a Render
+      maxAge: 8 * 60 * 60 * 1000 // 8 horas
+    });
+
     console.log("Usuario encontrado:", user.username);
-    console.log("Token generado:", token);
 
     res.json({
       mensaje: 'Login exitoso',
@@ -126,8 +134,7 @@ app.post('/api/login', async (req, res) => {
         apellido: user.apellido,
         role: user.role,
         permissions: user.permissions
-      },
-      accessToken: token
+      }
     });
 
   } catch (err) {
@@ -136,17 +143,31 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+app.post('/api/logout', (req, res) => {
+  // Para borrar la cookie, necesitamos pasar las MISMAS opciones 
+  // que usamos al crearla (excepto maxAge/expires)
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true,   // true para Render/Vercel (HTTPS)
+    sameSite: 'none'
+  });
 
-  if (!token) return res.status(401).json({ error: 'Token no proporcionado' });
+  return res.status(200).json({ message: 'Sesión cerrada exitosamente' });
+});
+
+const authenticateToken = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token no proporcionado' });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
+    res.clearCookie('token');
     res.status(403).json({ error: 'Token inválido o expirado' });
   }
 };
