@@ -14,7 +14,7 @@ const whitelist = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://192.168.1.14:3000',
-  'https://kiga-front.vercel.app'
+  'https://kiga-kinesio.vercel.app'
 ];
 
 const corsOptions = {
