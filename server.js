@@ -31,9 +31,25 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // RUTA PING
-app.get('/ping', (req, res) => {
-  console.log('Ping recibido!');
-  res.send('pong');
+app.get('/ping', async (req, res) => {
+  try {
+    // 1. Despertar a MySQL
+    // Ejecutamos una consulta minúscula. Esto resetea el contador de 8 horas de MySQL.
+    await db.query('SELECT 1');
+
+    console.log('✅ Ping recibido. App y DB activas.');
+    res.status(200).send('pong');
+
+  } catch (error) {
+    console.error('❌ ALERTA: El servidor está despierto pero la DB se desconectó:', error);
+
+    // Importante: Enviamos error 500.
+    // UptimeRobot verá esto como "DOWN" y te mandará un mail avisándote.
+    res.status(500).send('DB Error');
+
+    // Opcional: Forzar reinicio del proceso para reconectar
+    // process.exit(1); 
+  }
 });
 
 // --- SEGURIDAD ---
