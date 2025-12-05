@@ -30,25 +30,31 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// RUTA PING
+// RUTA PING (Con Reintento Automático)
 app.get('/ping', async (req, res) => {
   try {
-    // 1. Despertar a MySQL
-    // Ejecutamos una consulta minúscula. Esto resetea el contador de 8 horas de MySQL.
+    // INTENTO 1
     await db.query('SELECT 1');
-
-    console.log('✅ Ping recibido. App y DB activas.');
+    console.log('✅ Ping OK - APP y DB activas. (Intento 1)');
     res.status(200).send('pong');
 
   } catch (error) {
-    console.error('❌ ALERTA: El servidor está despierto pero la DB se desconectó:', error);
+    console.warn('⚠️ El primer intento de Ping falló. Reintentando...', error.code);
 
-    // Importante: Enviamos error 500.
-    // UptimeRobot verá esto como "DOWN" y te mandará un mail avisándote.
-    res.status(500).send('DB Error');
+    try {
+      // INTENTO 2 (Forzamos reconexión)
+      // Esperamos 1 segundo por seguridad
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
-    // Opcional: Forzar reinicio del proceso para reconectar
-    // process.exit(1); 
+      await db.query('SELECT 1');
+      console.log('✅ Ping RECUPERADO - APP y DB activas. (Intento 2)');
+      res.status(200).send('pong recuperado');
+
+    } catch (error2) {
+      // Si falla dos veces, es que la base de datos se cayó de verdad
+      console.error('❌ ALERTA: La DB está caída definitivamente:', error2);
+      res.status(500).send('DB Error Fatal');
+    }
   }
 });
 
