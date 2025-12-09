@@ -460,11 +460,10 @@ app.get('/api/history_entries', async (req, res) => {
 app.post('/api/history_entries', async (req, res) => {
   try {
     const { id_paciente, Fecha, Seguimiento } = req.body;
-    const fechaFormateada = new Date(Fecha).toISOString().slice(0, 10);
 
     const [result] = await db.query(
       'INSERT INTO history_entries (id_paciente, fecha, seguimiento) VALUES (?, ?, ?)',
-      [id_paciente, fechaFormateada, Seguimiento]
+      [id_paciente, Fecha, Seguimiento]
     );
 
     const [[newEntry]] = await db.query(
@@ -482,11 +481,10 @@ app.put('/api/history_entries/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { id_paciente, Fecha, Seguimiento } = req.body;
-    const fechaFormateada = new Date(Fecha).toISOString().slice(0, 10);
 
     await db.query(
       'UPDATE history_entries SET id_paciente = ?, fecha = ?, seguimiento = ? WHERE id_historial = ?',
-      [id_paciente, fechaFormateada, Seguimiento, id]
+      [id_paciente, Fecha, Seguimiento, id]
     );
 
     const [[updatedEntry]] = await db.query(
