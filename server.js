@@ -93,9 +93,11 @@ const db = mysql.createPool({
     rejectUnauthorized: true
   },
   waitForConnections: true,
-  connectionLimit: 5,
+  connectionLimit: 10,
+  maxIdle: 10,
   queueLimit: 0,
   enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
   dateStrings: true
 }).promise();
 
